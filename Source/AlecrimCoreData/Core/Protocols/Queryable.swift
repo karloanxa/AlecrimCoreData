@@ -20,31 +20,30 @@ public protocol Queryable: Enumerable {
 
 extension Queryable {
     
-    public func sortByAttribute<A: AttributeType>(attribute: A, ascending: Bool = true) -> Self {
-        return self.sortByAttributeName(attribute.___name, ascending: ascending, options: attribute.___comparisonPredicateOptions)
+    public final func sort<A: AttributeProtocol>(using attribute: A, ascending: Bool = true) -> Self {
+        return self.sort(usingAttributeName: attribute.___name, ascending: ascending, options: attribute.___comparisonPredicateOptions)
     }
-
-    public func sortByAttributeName(attributeName: String, ascending: Bool = true, options: NSComparisonPredicateOptions = NSComparisonPredicateOptions()) -> Self {
+    
+    public final func sort(usingAttributeName attributeName: String, ascending: Bool = true, options: NSComparisonPredicate.Options = PersistentContainerOptions.defaultComparisonPredicateOptions) -> Self {
         let sortDescriptor: NSSortDescriptor
         
-        if options.contains(.CaseInsensitivePredicateOption) && options.contains(.DiacriticInsensitivePredicateOption) {
-            sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending, selector: Selector("localizedCaseInsensitiveCompare:"))
+        if options.contains(.caseInsensitive) && options.contains(.diacriticInsensitive) {
+            sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:)))
         }
-        else if options.contains(.CaseInsensitivePredicateOption) {
-            sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending, selector: Selector("caseInsensitiveCompare:"))
+        else if options.contains(.caseInsensitive) {
+            sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending, selector: #selector(NSString.caseInsensitiveCompare(_:)))
         }
-        else if options.contains(.DiacriticInsensitivePredicateOption) {
-            sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending, selector: Selector("localizedCompare:"))
+        else if options.contains(.diacriticInsensitive) {
+            sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending, selector: #selector(NSString.localizedCompare(_:)))
         }
         else {
             sortDescriptor = NSSortDescriptor(key: attributeName, ascending: ascending)
         }
         
-        
-        return self.sortUsingSortDescriptor(sortDescriptor)
+        return self.sort(using: sortDescriptor)
     }
-
-    public func sortUsingSortDescriptor(sortDescriptor: NSSortDescriptor) -> Self {
+    
+    public final func sort(using sortDescriptor: NSSortDescriptor) -> Self {
         var clone = self
         
         if clone.sortDescriptors != nil {
@@ -56,8 +55,8 @@ extension Queryable {
         
         return clone
     }
-
-    public func sortUsingSortDescriptors(sortDescriptors: [NSSortDescriptor]) -> Self {
+    
+    public final func sort(using sortDescriptors: [NSSortDescriptor]) -> Self {
         var clone = self
 
         if clone.sortDescriptors != nil {
@@ -69,14 +68,14 @@ extension Queryable {
         
         return clone
     }
-
+    
 }
 
 // MARK - filtering
 
 extension Queryable {
     
-    public func filterUsingPredicate(predicate: NSPredicate) -> Self {
+    public final func filter(using predicate: NSPredicate) -> Self {
         var clone = self
         
         if let existingPredicate = clone.predicate {

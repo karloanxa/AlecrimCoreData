@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - non nullable attribute
 
-public struct Attribute<T>: AttributeType {
+public struct Attribute<T>: AttributeProtocol {
     
     public typealias ValueType = T
     
@@ -20,7 +20,7 @@ public struct Attribute<T>: AttributeType {
         self.___name = name
     }
 
-    public init(_ name: String, _ parentAttribute: NamedAttributeType) {
+    public init(_ name: String, _ parentAttribute: NamedAttributeProtocol) {
         self.___name = parentAttribute.___name + "." + name
     }
     
@@ -28,7 +28,7 @@ public struct Attribute<T>: AttributeType {
 
 // MARK: nullable (comparable to nil) attribute
 
-public struct NullableAttribute<T>: NullableAttributeType {
+public struct NullableAttribute<T>: NullableAttributeProtocol {
 
     public typealias ValueType = T
     
@@ -38,7 +38,7 @@ public struct NullableAttribute<T>: NullableAttributeType {
         self.___name = name
     }
     
-    public init(_ name: String, _ parentAttribute: NamedAttributeType) {
+    public init(_ name: String, _ parentAttribute: NamedAttributeProtocol) {
         self.___name = parentAttribute.___name + "." + name
     }
     
@@ -46,35 +46,29 @@ public struct NullableAttribute<T>: NullableAttributeType {
 
 // MARK: - Attribute extensions - CollectionType
 
-extension Attribute where T: CollectionType {
+extension Attribute where T: Collection {
     
     public func count() -> Attribute<Int> {
         return Attribute<Int>("@count", self)
     }
     
-    public func max<U>(@noescape closure: (T.Generator.Element.Type) -> Attribute<U>) -> Attribute<U> {
-        let innerAttribute = closure(T.Generator.Element.self)
+    public func max<U>(_ closure: (T.Iterator.Element.Type) -> Attribute<U>) -> Attribute<U> {
+        let innerAttribute = closure(T.Iterator.Element.self)
         return Attribute<U>("@max." + innerAttribute.___name, self)
     }
 
-    public func min<U>(@noescape closure: (T.Generator.Element.Type) -> Attribute<U>) -> Attribute<U> {
-        let innerAttribute = closure(T.Generator.Element.self)
+    public func min<U>(_ closure: (T.Iterator.Element.Type) -> Attribute<U>) -> Attribute<U> {
+        let innerAttribute = closure(T.Iterator.Element.self)
         return Attribute<U>("@min." + innerAttribute.___name, self)
     }
     
-    public func avg<U>(@noescape closure: (T.Generator.Element.Type) -> Attribute<U>) -> Attribute<U> {
-        let innerAttribute = closure(T.Generator.Element.self)
+    public func avg<U>(_ closure: (T.Iterator.Element.Type) -> Attribute<U>) -> Attribute<U> {
+        let innerAttribute = closure(T.Iterator.Element.self)
         return Attribute<U>("@avg." + innerAttribute.___name, self)
     }
 
-    // same as avg, for convenience
-    public func average<U>(@noescape closure: (T.Generator.Element.Type) -> Attribute<U>) -> Attribute<U> {
-        let innerAttribute = closure(T.Generator.Element.self)
-        return Attribute<U>("@avg." + innerAttribute.___name, self)
-    }
-
-    public func sum<U>(@noescape closure: (T.Generator.Element.Type) -> Attribute<U>) -> Attribute<U> {
-        let innerAttribute = closure(T.Generator.Element.self)
+    public func sum<U>(_ closure: (T.Iterator.Element.Type) -> Attribute<U>) -> Attribute<U> {
+        let innerAttribute = closure(T.Iterator.Element.self)
         return Attribute<U>("@sum." + innerAttribute.___name, self)
     }
 
